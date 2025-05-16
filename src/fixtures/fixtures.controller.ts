@@ -17,4 +17,14 @@ export class FixturesController {
   ) {
     return this.fixtureService.getFixtureHeadToHead(team1, team2);
   }
+
+  @Get('/rounds/:id')
+  getRoundsById(@Param('id') id: string) {
+    return this.fixtureService.getRoundsById(id);
+  }
+
+  @Get('/rounds/:id/:round')
+  getFixturesByRound(@Param('id') id: string, @Param('round') round: string) {
+    return this.fixtureService.getFixturesByRound(id, round);
+  }
 }

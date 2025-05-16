@@ -1,48 +1,116 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { Injectable } from '@nestjs/common';
-import {
-  Fixture,
-  MatchEvent,
-  MatchEvents,
-  Statistic,
-  Team,
-} from 'src/entity/fixtures.entity';
+import { HttpService } from '@nestjs/axios';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { AxiosResponse } from 'axios';
+import { firstValueFrom, Observable } from 'rxjs';
+import { EventDTO, MatchDTO, StatisticsDTO } from 'src/dto/match.dto';
+import { MatchEvents, Statistic } from 'src/entity/match.entity';
 
 @Injectable()
 export class FixturesService {
-  getFixtureById(id: string): Fixture {
-    return {
-      fixture: this.fixtures.fixture,
-      league: this.fixtures.league,
-      goals: this.fixtures.goals,
-      score: this.fixtures.score,
-      events: this.formatEvents(
-        this.fixtures.events,
-        this.fixtures.teams.home.id,
-        this.fixtures.teams.away.id,
-      ),
-      statistics: this.formatStatistics(this.fixtures.statistics),
-      lineups: {
-        home: this.fixtures.lineups[0],
-        away: this.fixtures.lineups[1],
+  constructor(private httpService: HttpService) {}
+
+  private getApiFixtureData<T>(
+    endpoint: string,
+  ): Observable<AxiosResponse<{ response: T }>> {
+    return this.httpService.get(
+      `https://v3.football.api-sports.io/fixtures${endpoint}`,
+      {
+        headers: {
+          'x-rapidapi-key': process.env.API_KEY,
+        },
       },
-      teams: this.fixtures.teams,
-    };
+    );
   }
 
-  getFixtureHeadToHead(team1: string, team2: string) {
-    return this.h2h
+  async getFixtureById(id: string) {
+    const { data } = await firstValueFrom(
+      this.getApiFixtureData<MatchDTO[]>(`?id=${id}`),
+    );
+    const { response } = data;
+
+    if (response.length > 0) {
+      const { events, statistics, lineups, teams } = response[0];
+      return {
+        ...response[0],
+        events: this.formatEvents(events, teams.home.id, teams.away.id),
+        statistics: this.formatStatistics(statistics),
+        lineups: {
+          home: lineups[0],
+          away: lineups[1],
+        },
+      };
+    }
+
+    throw new NotFoundException();
+  }
+
+  async getFixtureHeadToHead(team1: string, team2: string) {
+    const { data } = await firstValueFrom(
+      this.getApiFixtureData<MatchDTO[]>(`/headtohead?h2h=${team1}-${team2}`),
+    );
+    const { response } = data;
+
+    if (!response) throw new NotFoundException();
+
+    return response
       .sort((a, b) => a.fixture.timestamp - b.fixture.timestamp)
       .splice(-5);
   }
 
+  async getRoundsById(id: string) {
+    const { data } = await firstValueFrom(
+      this.getApiFixtureData<string[]>(`/rounds?league=${id}&season=2021`),
+    );
+
+    console.log(data);
+
+    if (!data.response) throw new NotFoundException();
+
+    return data.response;
+  }
+
+  async getFixturesByRound(leagueId: string, round: string) {
+    const { data } = await firstValueFrom(
+      this.getApiFixtureData<MatchDTO[]>(
+        `?league=${leagueId}&season=2021&round=${round}`,
+      ),
+    );
+
+    if (data?.response?.length > 0) {
+      const { response } = data;
+
+      const groupByDate: { [key: string]: MatchDTO[] } = {};
+
+      for (const fixture of response) {
+        const { date, timezone } = fixture.fixture;
+
+        const formatted = new Date(date).toLocaleDateString(timezone, {
+          year: '2-digit',
+          month: '2-digit',
+          day: '2-digit',
+        });
+
+        if (formatted in groupByDate) {
+          groupByDate[formatted] = [...groupByDate[formatted], fixture];
+        } else {
+          groupByDate[formatted] = [fixture];
+        }
+      }
+
+      return groupByDate;
+    }
+
+    throw new NotFoundException();
+  }
+
   private formatEvents(
-    data: MatchEvent[],
+    data: EventDTO[],
     homeId: number,
     awayId: number,
   ): MatchEvents[] {
-    const match: Record<string, MatchEvent> = {};
+    const match: Record<string, MatchEvents> = {};
 
     for (const e of data) {
       match[e.time.elapsed] = {
@@ -64,15 +132,7 @@ export class FixturesService {
     );
   }
 
-  private formatStatistics(
-    data: {
-      team: Team;
-      statistics: {
-        type: string;
-        value: string | number;
-      }[];
-    }[],
-  ): Statistic[] {
+  private formatStatistics(data: StatisticsDTO[]): Statistic[] {
     const statistics: Statistic[] = [];
 
     if (
