@@ -4,7 +4,7 @@ import {
   LeagueDTO,
   ScoreDTO,
   Team,
-} from 'src/dto/match.dto';
+} from 'src/types/match.dto';
 
 export interface Statistic {
   name: string;

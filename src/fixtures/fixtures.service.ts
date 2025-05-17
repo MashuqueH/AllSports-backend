@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { firstValueFrom, Observable } from 'rxjs';
-import { EventDTO, MatchDTO, StatisticsDTO } from 'src/dto/match.dto';
+import { EventDTO, MatchDTO, StatisticsDTO } from 'src/types/match.dto';
 import { MatchEvents, Statistic } from 'src/entity/match.entity';
 
 @Injectable()

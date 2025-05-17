@@ -1,4 +1,4 @@
-export interface StandingsDTO {
+export interface Standings {
   league: League;
 }
 
@@ -24,7 +24,7 @@ export interface Standing {
   all: Statistics;
   home: Statistics;
   away: Statistics;
-  update: Date;
+  update: string;
 }
 
 export interface Statistics {
