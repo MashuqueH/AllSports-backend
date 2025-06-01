@@ -1,25 +1,74 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  NotFoundException,
+} from '@nestjs/common';
 import { MatchService } from './match.service';
-import { CreateMatchDto } from './dto/create-match.dto';
 import { UpdateMatchDto } from './dto/update-match.dto';
+import { firstValueFrom } from 'rxjs';
+import { Match } from './entities/match.entity';
 
 @Controller('match')
 export class MatchController {
   constructor(private readonly matchService: MatchService) {}
 
-  @Post()
-  create(@Body() createMatchDto: CreateMatchDto) {
-    return this.matchService.create(createMatchDto);
-  }
-
   @Get()
   findAll() {
-    return this.matchService.findAll();
+    // return this.matchService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.matchService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const existing = await this.matchService.findOne(+id);
+
+    if (existing) return existing;
+
+    const { data } = await firstValueFrom(this.matchService.getMatchData(+id));
+
+    if (data?.response && data.response.length > 0) {
+      const {
+        events,
+        statistics,
+        lineups,
+        teams,
+        fixture,
+        league,
+        goals,
+        score,
+        players,
+      } = data.response[0];
+
+      const match: Match = new Match();
+
+      match.match_id = fixture.id;
+      match.fixture = fixture;
+      match.league = league;
+      match.teams = teams;
+      match.goals = goals;
+      match.score = score;
+      match.events = this.matchService.formatEvents(
+        events,
+        teams.home.id,
+        teams.away.id,
+      );
+      match.lineups = {
+        home: lineups[0],
+        away: lineups[1],
+      };
+      match.players = players;
+      match.statistics = this.matchService.formatStatistics(statistics);
+
+      console.log(match);
+
+      return this.matchService.create(match);
+    }
+
+    throw new NotFoundException();
   }
 
   @Patch(':id')

@@ -1,10 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ObjectIdColumn } from 'typeorm';
 import { Standings } from './standings.entity';
 
 @Entity()
 export class League {
-  @PrimaryGeneratedColumn()
-  league_id: number;
+  @ObjectIdColumn()
+  _id: string;
 
   @Column()
   id: number;
@@ -18,6 +18,6 @@ export class League {
   flag: string;
   @Column()
   season: number;
-  @OneToMany(() => Standings, (standing) => standing.league, { cascade: true })
+  @Column(() => Standings)
   standings: Standings[];
 }

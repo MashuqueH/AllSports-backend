@@ -10,6 +10,11 @@ export interface MatchDTO {
   players?: PlayersDto[];
 }
 
+export interface Score {
+  home: number;
+  away: number;
+}
+
 export interface EventDTO {
   time: Time;
   team: Team;
@@ -165,10 +170,10 @@ export interface Games {
 }
 
 export interface StatisticGoals {
-  total: number | null;
+  total: number;
   conceded: number;
-  assists: null;
-  saves: number | null;
+  assists: number;
+  saves: number;
 }
 
 export interface Passes {
@@ -178,8 +183,8 @@ export interface Passes {
 }
 
 export interface Penalty {
-  won: null;
-  commited: null;
+  won: number;
+  commited: number;
   scored: number;
   missed: number;
   saved: number;

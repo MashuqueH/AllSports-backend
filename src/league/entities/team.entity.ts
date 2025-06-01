@@ -1,11 +1,7 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Standings } from './standings.entity';
+import { Column, Entity } from 'typeorm';
 
 @Entity()
 export class Team {
-  @PrimaryGeneratedColumn()
-  team_id: number;
-
   @Column()
   id: number;
   @Column()
@@ -16,7 +12,4 @@ export class Team {
   update?: Date;
   @Column({ nullable: true })
   winner?: boolean;
-
-  @OneToMany(() => Standings, (standings) => standings.team)
-  standings?: Standings;
 }

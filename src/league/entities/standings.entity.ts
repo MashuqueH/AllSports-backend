@@ -1,24 +1,11 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { League } from './league.entity';
-import { Statistics } from 'src/types/standing';
-import { Team } from './team.entity';
+import { Column, Entity } from 'typeorm';
+import { Statistics, Team } from 'src/types/standing';
 
 @Entity()
 export class Standings {
-  @PrimaryGeneratedColumn()
-  id: number;
-
   @Column()
   rank: number;
-  @OneToOne(() => Team, (team) => team.team_id, { cascade: true })
-  @JoinColumn()
+  @Column()
   team: Team;
   @Column()
   points: number;
@@ -32,15 +19,12 @@ export class Standings {
   status: string;
   @Column({ nullable: true })
   description: string;
-  @Column('simple-json')
+  @Column()
   all: Statistics;
-  @Column('simple-json')
+  @Column()
   home: Statistics;
-  @Column('simple-json')
+  @Column()
   away: Statistics;
   @Column()
   update: string;
-
-  @ManyToOne(() => League, (league) => league.standings)
-  league: League;
 }

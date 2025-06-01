@@ -45,17 +45,10 @@ export class LeagueService {
     });
   }
 
-  findOne(id: number, season: number) {
-    return this.leagueRepository.findOne({
-      where: {
-        id,
-        season,
-      },
-      relations: {
-        standings: {
-          team: true,
-        },
-      },
+  async findOne(id: number, season: number) {
+    return await this.leagueRepository.manager.findOneBy(League, {
+      id,
+      season,
     });
   }
 
