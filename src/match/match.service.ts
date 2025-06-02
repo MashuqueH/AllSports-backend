@@ -35,9 +35,9 @@ export class MatchService {
   }
 
   findOne(id: number) {
-    return this.matchRepository.findOne({
+    return this.matchRepository.manager.getMongoRepository(Match).findOne({
       where: {
-        match_id: id,
+        'fixture.id': id,
       },
     });
   }

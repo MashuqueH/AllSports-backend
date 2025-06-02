@@ -1,18 +1,11 @@
 import { Module } from '@nestjs/common';
 import { FixturesController } from './fixtures.controller';
 import { FixturesService } from './fixtures.service';
-import { HttpModule } from '@nestjs/axios';
-import moment from 'moment';
+import { ApiModule } from 'src/api/api.module';
 
 @Module({
-  imports: [HttpModule],
+  imports: [ApiModule],
   controllers: [FixturesController],
-  providers: [
-    FixturesService,
-    // {
-    //   provide: 'MomentWrapper',
-    //   useValue: moment,
-    // },
-  ],
+  providers: [FixturesService],
 })
 export class FixturesModule {}

@@ -17,39 +17,6 @@ import { firstValueFrom } from 'rxjs';
 export class LeagueController {
   constructor(private readonly leagueService: LeagueService) {}
 
-  @Post()
-  async create(@Body() createLeagueDto: { id: number; season: number }) {
-    console.log(createLeagueDto);
-    const existing = await this.leagueService.findOne(
-      createLeagueDto.id,
-      createLeagueDto.season,
-    );
-
-    console.log(existing);
-
-    if (existing) {
-      return existing;
-    }
-
-    const { data } = await firstValueFrom(
-      this.leagueService.getLeagueData(
-        createLeagueDto.id,
-        createLeagueDto.season,
-      ),
-    );
-
-    if (data?.response && data.response.length > 0) {
-      const { ...league } = data.response[0].league;
-
-      return this.leagueService.create({
-        ...league,
-        standings: league?.standings.length ? league.standings[0] : [],
-      });
-    }
-
-    throw new NotAcceptableException();
-  }
-
   @Get()
   findAll() {
     return this.leagueService.findAll();

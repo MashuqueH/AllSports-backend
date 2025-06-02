@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
@@ -24,8 +23,10 @@ export class MatchController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
+    console.log(id);
     const existing = await this.matchService.findOne(+id);
 
+    console.log('existing');
     if (existing) return existing;
 
     const { data } = await firstValueFrom(this.matchService.getMatchData(+id));
@@ -45,7 +46,6 @@ export class MatchController {
 
       const match: Match = new Match();
 
-      match.match_id = fixture.id;
       match.fixture = fixture;
       match.league = league;
       match.teams = teams;
@@ -62,8 +62,6 @@ export class MatchController {
       };
       match.players = players;
       match.statistics = this.matchService.formatStatistics(statistics);
-
-      console.log(match);
 
       return this.matchService.create(match);
     }

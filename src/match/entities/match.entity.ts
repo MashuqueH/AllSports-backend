@@ -7,36 +7,36 @@ import {
   Team,
   TeamsDTO,
 } from 'src/types/match.dto';
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, ObjectIdColumn } from 'typeorm';
 
 @Entity()
 export class Match {
-  @PrimaryColumn()
-  match_id: number;
+  @ObjectIdColumn()
+  _id: number;
 
-  @Column('simple-json')
+  @Column()
   fixture: FixtureDTO;
 
-  @Column('simple-json')
+  @Column()
   league: LeagueDTO;
 
-  @Column('simple-json')
+  @Column()
   teams: {
     home: Team;
     away: Team;
   };
 
-  @Column('simple-json', { nullable: true })
+  @Column({ nullable: true })
   goals: TeamsDTO;
 
-  @Column('simple-json', { nullable: true })
+  @Column({ nullable: true })
   score: ScoreDTO;
-  @Column('simple-json', { nullable: true })
+  @Column({ nullable: true })
   events?: MatchEvents[];
-  @Column('simple-json', { nullable: true })
+  @Column({ nullable: true })
   lineups?: Lineups;
-  @Column('simple-json', { nullable: true })
+  @Column({ nullable: true })
   statistics?: Statistic[];
-  @Column('simple-json', { nullable: true })
+  @Column({ nullable: true })
   players?: PlayersDto[];
 }
